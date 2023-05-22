@@ -1,28 +1,26 @@
-import { ConnectButton } from "web3uikit"
-import { useMarketplace } from "../../hooks/useMarketplace"
-import { useMoralis } from "react-moralis"
-import { contractAddresses } from "../../constants"
+import { useModal } from "../../hooks/useModal"
+import { ModalBox } from "../../components/ModalBox"
+import { DefaultLayout } from "../../components/DefaultLayout"
+
+const PLACE_ORDER_MODAL_ID = "place-order-form"
 
 export const DashBoard = () => {
-    const { chainId: chainIdHex, account } = useMoralis()
-    const chainId = parseInt(chainIdHex)
-    const marketplaceAddress =
-        chainId in contractAddresses ? contractAddresses[chainId][0] : null
-    const { placeSellOrder, getSellOrder } = useMarketplace(marketplaceAddress)
+    const { triggerModal } = useModal()
 
     return (
-        <div>
-            Token Marketplace
-            <ConnectButton moralisAuth={false} />
+        <DefaultLayout>
             <button
+                className="mt-2 bg-rose-400 p-1 text-white"
                 onClick={() => {
-                    placeSellOrder({
-                        tokenAddress:
-                            "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-                        tokenAmount: 20,
-                        totalPrice: 100,
+                    triggerModal({
+                        targetId: PLACE_ORDER_MODAL_ID,
                     })
-
+                    // placeSellOrder({
+                    //     tokenAddress:
+                    //         "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+                    //     tokenAmount: 20,
+                    //     totalPrice: 100,
+                    // })
                     // getSellOrder({
                     //     userAddress: account,
                     //     tokenAddress:
@@ -30,8 +28,11 @@ export const DashBoard = () => {
                     // })
                 }}
             >
-                Helooooo
+                Dashboard
             </button>
-        </div>
+            <ModalBox id={PLACE_ORDER_MODAL_ID}>
+                <input placeholder="Name here" />
+            </ModalBox>
+        </DefaultLayout>
     )
 }
