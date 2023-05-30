@@ -1,140 +1,94 @@
-import { useMoralis, useWeb3Contract } from "react-moralis"
-import { marketplaceAbi, erc20Abi } from "../constants"
-import { BigNumber, ethers } from "ethers"
+import { useMoralis } from "react-moralis"
+import { marketplaceAbi } from "../constants"
+import { BigNumber } from "ethers"
+import { useContractHOC } from "./useContractHOC"
+import { useERC20Token } from "./useERC20Token"
 
 export const useMarketplace = (marketplaceAddress) => {
-    const { Moralis } = useMoralis()
-    const { runContractFunction } = useWeb3Contract()
-
-    const defaultOptions = {
-        abi: marketplaceAbi,
+    const { Moralis, account } = useMoralis()
+    const { runContractFunction } = useContractHOC({
+        contractAbi: marketplaceAbi,
         contractAddress: marketplaceAddress,
-        functionName: "",
-        params: {},
-    }
+    })
+
+    const { getDecimals, getAllowance, approveAllowance } = useERC20Token()
 
     const placeSellOrder = async ({
         tokenAddress,
         tokenAmount,
         totalPrice,
     }) => {
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const signer = provider.getSigner()
-        const tokenContract = new ethers.Contract(
-            tokenAddress,
-            erc20Abi,
-            signer
+        const amountInWei = Moralis.Units.Token(
+            tokenAmount,
+            await getDecimals(tokenAddress)
         )
-        const amountInWei = Moralis.Units.Token(tokenAmount, 18)
         const totalPriceInWei = Moralis.Units.ETH(totalPrice)
-        const userAddress = await signer.getAddress()
-        const allowance = await tokenContract.allowance(
-            userAddress,
-            marketplaceAddress
-        )
+        const allowance = await getAllowance({
+            tokenAddress,
+            owner: account,
+            spender: marketplaceAddress,
+        })
+
         if (allowance.lt(amountInWei)) {
             const newAllowance = BigNumber.from(amountInWei).sub(allowance)
-            await tokenContract.approve(marketplaceAddress, newAllowance)
+            await approveAllowance({
+                tokenAddress,
+                spender: marketplaceAddress,
+                amount: newAllowance,
+            })
         }
 
-        await runContractFunction({
+        return await runContractFunction({
+            functionName: "placeSellOrder",
             params: {
-                ...defaultOptions,
-                ...{
-                    functionName: "placeSellOrder",
-                    params: {
-                        tokenAddress: tokenAddress,
-                        amount: amountInWei,
-                        totalPrice: totalPriceInWei,
-                    },
-                },
+                tokenAddress: tokenAddress,
+                amount: amountInWei,
+                totalPrice: totalPriceInWei,
             },
-            onError: (error) => {
-                console.log(error)
-            },
-            throwOnError: false,
         })
     }
 
     const getSellOrder = async ({ userAddress, tokenAddress }) => {
-        const result = await runContractFunction({
+        return await runContractFunction({
+            functionName: "getSellOrder",
             params: {
-                ...defaultOptions,
-                ...{
-                    functionName: "getSellOrder",
-                    params: {
-                        owner: userAddress,
-                        tokenAddress: tokenAddress,
-                    },
-                },
+                owner: userAddress,
+                tokenAddress: tokenAddress,
             },
-            onError: (error) => {
-                console.log(error)
-            },
-            throwOnError: false,
         })
-        console.log(result)
     }
 
     const placeBuyOrder = async ({ tokenAddress, tokenAmount, totalPrice }) => {
         const amountInWei = Moralis.Units.Token(tokenAmount, 18)
         const totalPriceInWei = Moralis.Units.ETH(totalPrice)
-        await runContractFunction({
+        return await runContractFunction({
+            functionName: "placeBuyOrder",
             params: {
-                ...defaultOptions,
-                ...{
-                    functionName: "placeBuyOrder",
-                    params: {
-                        tokenAddress: tokenAddress,
-                        amount: amountInWei,
-                    },
-                    msgValue: totalPriceInWei,
-                },
+                tokenAddress: tokenAddress,
+                amount: amountInWei,
             },
-            onError: (error) => {
-                console.log(error)
-            },
-            throwOnError: false,
+            msgValue: totalPriceInWei,
         })
     }
 
     const getBuyOrder = async ({ userAddress, tokenAddress }) => {
-        const result = await runContractFunction({
+        return await runContractFunction({
+            functionName: "getBuyOrder",
             params: {
-                ...defaultOptions,
-                ...{
-                    functionName: "getBuyOrder",
-                    params: {
-                        owner: userAddress,
-                        tokenAddress: tokenAddress,
-                    },
-                },
+                owner: userAddress,
+                tokenAddress: tokenAddress,
             },
-            onError: (error) => {
-                console.log(error)
-            },
-            throwOnError: false,
         })
-        console.log(result)
     }
 
     const cancelOrder = async (userAddress, tokenAddress, isBuyOrder) => {
-        await runContractFunction({
+        return await runContractFunction({
+            functionName: "cancelOrder",
             params: {
-                ...defaultOptions,
-                ...{
-                    functionName: "cancelOrder",
-                    params: {
-                        owner: userAddress,
-                        tokenAddress: tokenAddress,
-                        isBuyOrder: isBuyOrder,
-                    },
-                },
+                owner: userAddress,
+                tokenAddress: tokenAddress,
+                isBuyOrder: isBuyOrder,
             },
-            onError: (error) => {
-                console.log(error)
-            },
-            throwOnError: false,
         })
     }
 

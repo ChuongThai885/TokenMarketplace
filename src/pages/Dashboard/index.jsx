@@ -1,38 +1,88 @@
-import { useModal } from "../../hooks/useModal"
-import { ModalBox } from "../../components/ModalBox"
 import { DefaultLayout } from "../../components/DefaultLayout"
+import { useModal } from "../../hooks/useModal"
+import React from "react"
+import { OrderModal } from "./OrderModal"
+import { useMoralis } from "react-moralis"
+import { contractAddresses } from "../../constants"
+import { useMarketplace } from "../../hooks/useMarketplace"
 
 const PLACE_ORDER_MODAL_ID = "place-order-form"
 
 export const DashBoard = () => {
-    const { triggerModal } = useModal()
+    const { modal, triggerModal } = useModal()
+    // const dispatch = useNotification()
+
+    // const handleNewNotification = () => {
+    //     dispatch({
+    //         id: "custom_noti",
+    //         type: "info",
+    //         message: "Somebody messaged you",
+    //         title: "New Notification",
+    //         position: "topR",
+    //     })
+    // }
+
+    const { chainId: chainIdHex } = useMoralis()
+    const chainId = parseInt(chainIdHex)
+    const marketplaceAddress =
+        chainId in contractAddresses ? contractAddresses[chainId][0] : null
+
+    const { placeSellOrder, placeBuyOrder } = useMarketplace(marketplaceAddress)
+
+    const handlePlaceOrder = async ({
+        tokenAddress,
+        tokenAmount,
+        totalPrice,
+        isBuyOrder,
+    }) => {
+        if (isBuyOrder) {
+            placeBuyOrder({
+                tokenAddress,
+                tokenAmount,
+                totalPrice,
+            })
+        } else {
+            placeSellOrder({
+                tokenAddress,
+                tokenAmount,
+                totalPrice,
+            })
+        }
+    }
 
     return (
         <DefaultLayout>
             <button
-                className="mt-2 bg-rose-400 p-1 text-white"
+                className="m-4 bg-blue-400 p-1 text-white"
                 onClick={() => {
                     triggerModal({
                         targetId: PLACE_ORDER_MODAL_ID,
                     })
-                    // placeSellOrder({
-                    //     tokenAddress:
-                    //         "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-                    //     tokenAmount: 20,
-                    //     totalPrice: 100,
-                    // })
-                    // getSellOrder({
-                    //     userAddress: account,
-                    //     tokenAddress:
-                    //         "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-                    // })
                 }}
             >
-                Dashboard
+                Place Order
             </button>
-            <ModalBox id={PLACE_ORDER_MODAL_ID}>
-                <input placeholder="Name here" />
-            </ModalBox>
+
+            <OrderModal
+                id={PLACE_ORDER_MODAL_ID}
+                onCancel={() => {
+                    modal.hide()
+                }}
+                onSubmit={({
+                    tokenAddress,
+                    tokenAmount,
+                    price,
+                    isBuyOrder,
+                }) => {
+                    modal.hide()
+                    handlePlaceOrder({
+                        tokenAddress,
+                        tokenAmount,
+                        totalPrice: price * tokenAmount,
+                        isBuyOrder,
+                    })
+                }}
+            />
         </DefaultLayout>
     )
 }

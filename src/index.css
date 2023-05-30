@@ -8,3 +8,7 @@
     --border-color: #f4f5f6;
     font-family: "Poppins-Regular";
 }
+#custom_noti {
+    position: relative;
+    z-index: 50;
+}
