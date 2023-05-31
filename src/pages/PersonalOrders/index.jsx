@@ -1,38 +1,27 @@
+import { useContext, useEffect, useState } from "react"
 import { DefaultLayout } from "../../components/DefaultLayout"
-import React, { useContext, useEffect, useState } from "react"
 import { MarketplaceContext } from "../../contexts/MarketplaceContext"
-import { MoralisContext } from "../../contexts/MoralisContext"
+import { MoralisContext } from "react-moralis"
 import { Blockie } from "web3uikit"
 
 const TABLE_HEADERS = {
     address: { name: "Token Address" },
     tokenName: { name: "Token Name" },
     symbol: { name: "Token Symbol" },
-    sellAmount: { name: "Sell Amount" },
-    buyAmount: { name: "Buy Amount" },
-    sellPrice: { name: "Sell Price" },
-    buyPrice: { name: "Buy Price" },
+    amount: { name: "Amount" },
+    price: { name: "Price" },
+    type: { name: "Type" },
 }
 
-export const DashBoard = () => {
+export const PersonalOrders = () => {
     const [tokenOrders, setTokenOrders] = useState([])
-    // const dispatch = useNotification()
 
-    // const handleNewNotification = () => {
-    //     dispatch({
-    //         id: "custom_noti",
-    //         type: "info",
-    //         message: "Somebody messaged you",
-    //         title: "New Notification",
-    //         position: "topR",
-    //     })
-    // }
-    const { getTokensFeed } = useContext(MarketplaceContext)
+    const { getPersonalOrders } = useContext(MarketplaceContext)
     const { isWeb3Enabled } = useContext(MoralisContext)
+
     useEffect(() => {
         const fetchTokensFeedData = async () => {
-            let orders = await getTokensFeed()
-            console.log(orders)
+            let orders = await getPersonalOrders()
             setTokenOrders(orders)
         }
         if (isWeb3Enabled) {
@@ -64,12 +53,14 @@ export const DashBoard = () => {
                                 tokenAddress,
                                 tokenName,
                                 tokenSymbol,
-                                totalSellAmount,
-                                totalBuyAmount,
-                                priceSell,
-                                priceBuy,
+                                amount,
+                                price,
+                                isBuyOrder,
                             }) => (
-                                <tr className="text-xs" key={tokenAddress}>
+                                <tr
+                                    key={`${tokenAddress}_${isBuyOrder}`}
+                                    className="text-xs"
+                                >
                                     <td className="flex px-5 py-3 whitespace-nowrap items-center">
                                         <div className="mr-2">
                                             <Blockie
@@ -85,17 +76,14 @@ export const DashBoard = () => {
                                     <td className="px-5 py-3 whitespace-nowrap">
                                         {tokenSymbol}
                                     </td>
-                                    <td className="px-5 py-3 whitespace-nowrap text-right">
-                                        {totalSellAmount}
+                                    <td className="px-5 py-3 whitespace-nowrap">
+                                        {amount}
                                     </td>
-                                    <td className="px-5 py-3 whitespace-nowrap text-right">
-                                        {totalBuyAmount}
+                                    <td className="px-5 py-3 whitespace-nowrap">
+                                        {price} ETH
                                     </td>
-                                    <td className="px-5 py-3 whitespace-nowrap text-right">
-                                        {priceSell.toFixed(3)} ETH
-                                    </td>
-                                    <td className="px-5 py-3 whitespace-nowrap text-right">
-                                        {priceBuy.toFixed(3)} ETH
+                                    <td className="px-5 py-3 whitespace-nowrap">
+                                        {isBuyOrder ? "Buy" : "Sell"}
                                     </td>
                                 </tr>
                             )

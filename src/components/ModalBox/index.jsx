@@ -1,6 +1,7 @@
 import clsx from "clsx"
 import React from "react"
 import { ReactComponent as CloseIcon } from "../../assets/close.svg"
+import { IconButton } from "../IconButton"
 
 export const ModalBox = ({ id, className, children, title, onClose }) => {
     return (
@@ -19,13 +20,12 @@ export const ModalBox = ({ id, className, children, title, onClose }) => {
                 >
                     <div className="flex border-b p-5">
                         <label className="text-2xl font-bold">{title}</label>
-                        <button
-                            type="button item-center"
+                        <IconButton
                             className="text-default-dark-blue hover:bg-gray-200 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
                             onClick={onClose}
                         >
                             <CloseIcon />
-                        </button>
+                        </IconButton>
                     </div>
                     <div className="p-5">{children}</div>
                 </div>
