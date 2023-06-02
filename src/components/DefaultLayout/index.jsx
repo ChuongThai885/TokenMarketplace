@@ -4,14 +4,20 @@ import { useModal } from "../../hooks/useModal"
 import { OrderModal } from "../../pages/Dashboard/OrderModal"
 import { MarketplaceContext } from "../../contexts/MarketplaceContext"
 import { MoralisContext } from "../../contexts/MoralisContext"
+import {
+    MESSAGE,
+    NOTI_TITLE,
+    NOTI_TYPE,
+    SUPPORTTED_CHAIN,
+} from "../../utils/constant"
 
-const SUPPORTTED_CHAIN = ["31337"]
 const PLACE_ORDER_MODAL_ID = "place-order-form"
 
 export const DefaultLayout = ({ children }) => {
-    const { isWeb3Enabled, chainId } = useContext(MoralisContext)
+    const { isWeb3Enabled, chainId, account } = useContext(MoralisContext)
 
-    const { placeSellOrder, placeBuyOrder } = useContext(MarketplaceContext)
+    const { placeSellOrder, placeBuyOrder, emitNotification } =
+        useContext(MarketplaceContext)
 
     const { modal, triggerModal } = useModal()
 
@@ -21,24 +27,39 @@ export const DefaultLayout = ({ children }) => {
         totalPrice,
         isBuyOrder,
     }) => {
+        let response
         if (isBuyOrder) {
-            placeBuyOrder({
+            response = await placeBuyOrder({
                 tokenAddress,
                 tokenAmount,
                 totalPrice,
             })
         } else {
-            placeSellOrder({
+            response = await placeSellOrder({
                 tokenAddress,
                 tokenAmount,
                 totalPrice,
             })
         }
+        if (response.error) {
+            emitNotification({
+                type: NOTI_TYPE.ERROR,
+                title: NOTI_TITLE.PLACE_ORDER_ERROR,
+                message: response.error,
+            })
+            return
+        }
+        emitNotification({
+            type: NOTI_TYPE.SUCCESS,
+            title: NOTI_TITLE.PLACE_ORDER_SUCCESS,
+            message: MESSAGE.PLACE_ORDER_SUCCESS,
+        })
     }
 
     return (
         <div className="w-full h-screen bg-gray-50">
             <Header
+                isConnected={account}
                 onCreateOrder={() => {
                     triggerModal({
                         targetId: PLACE_ORDER_MODAL_ID,

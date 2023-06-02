@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
 import { ModalBox } from "../../components/ModalBox"
-import _ from "lodash"
+import { debounce } from "lodash"
 import { useERC20Token } from "../../hooks/useERC20Token"
 
 const TOKEN_DATA = {
@@ -35,7 +35,7 @@ export const OrderModal = ({ id, onCancel, onSubmit }) => {
     }
 
     const debouncedLog = useCallback(
-        _.debounce((address) => {
+        debounce((address) => {
             checkTokenValidity(address)
         }, 1000),
         []

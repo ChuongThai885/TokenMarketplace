@@ -3,6 +3,9 @@ import { DefaultLayout } from "../../components/DefaultLayout"
 import { MarketplaceContext } from "../../contexts/MarketplaceContext"
 import { MoralisContext } from "react-moralis"
 import { Blockie } from "web3uikit"
+import { IconButton } from "../../components/IconButton"
+import { TrashIcon } from "@heroicons/react/24/outline"
+import { MESSAGE, NOTI_TITLE, NOTI_TYPE } from "../../utils/constant"
 
 const TABLE_HEADERS = {
     address: { name: "Token Address" },
@@ -11,23 +14,42 @@ const TABLE_HEADERS = {
     amount: { name: "Amount" },
     price: { name: "Price" },
     type: { name: "Type" },
+    setting: { name: "" },
 }
 
 export const PersonalOrders = () => {
     const [tokenOrders, setTokenOrders] = useState([])
 
-    const { getPersonalOrders } = useContext(MarketplaceContext)
+    const { getPersonalOrders, cancelOrder, emitNotification } =
+        useContext(MarketplaceContext)
     const { isWeb3Enabled } = useContext(MoralisContext)
-
+    const fetchTokensFeedData = async () => {
+        let orders = await getPersonalOrders()
+        setTokenOrders(orders)
+    }
     useEffect(() => {
-        const fetchTokensFeedData = async () => {
-            let orders = await getPersonalOrders()
-            setTokenOrders(orders)
-        }
         if (isWeb3Enabled) {
             fetchTokensFeedData()
         }
     }, [isWeb3Enabled])
+
+    const handleRemoveOrder = async (tokenAddress, isBuyOrder) => {
+        const response = await cancelOrder({ tokenAddress, isBuyOrder })
+        if (response.error) {
+            emitNotification({
+                type: NOTI_TYPE.SUCCESS,
+                title: NOTI_TITLE.DELETE_ORDER_ERROR,
+                message: response.error,
+            })
+            return
+        }
+        emitNotification({
+            type: NOTI_TYPE.SUCCESS,
+            title: NOTI_TITLE.DELETE_ORDER_SUCCESS,
+            message: MESSAGE.DELETE_ORDER_SUCCESS,
+        })
+        fetchTokensFeedData()
+    }
 
     return (
         <DefaultLayout>
@@ -84,6 +106,20 @@ export const PersonalOrders = () => {
                                     </td>
                                     <td className="px-5 py-3 whitespace-nowrap">
                                         {isBuyOrder ? "Buy" : "Sell"}
+                                    </td>
+                                    <td>
+                                        <IconButton
+                                            title="Remove Order"
+                                            className="hover:text-default-dark-blue"
+                                            onClick={() => {
+                                                handleRemoveOrder(
+                                                    tokenAddress,
+                                                    isBuyOrder
+                                                )
+                                            }}
+                                        >
+                                            <TrashIcon className="h-4 w-4" />
+                                        </IconButton>
                                     </td>
                                 </tr>
                             )

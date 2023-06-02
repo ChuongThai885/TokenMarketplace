@@ -5,7 +5,7 @@ import { NavBar } from "../NavBar"
 import { IconButton } from "../IconButton"
 import { DocumentPlusIcon } from "@heroicons/react/24/outline"
 
-export const Header = ({ onCreateOrder }) => {
+export const Header = ({ isConnected, onCreateOrder }) => {
     return (
         <div className="w-full flex justify-between items-center border-b">
             <div className="flex text-2xl p-4 items-center">
@@ -16,14 +16,17 @@ export const Header = ({ onCreateOrder }) => {
                 <NavBar />
             </div>
             <div className="flex items-center">
-                <IconButton
-                    className="w-8 h-8 bg-default-light-blue text-slate-600 hover:text-default-dark-blue justify-center items-center px-2"
-                    title="Add new order"
-                    onClick={onCreateOrder}
-                >
-                    <DocumentPlusIcon className="h-5 w-5" />
-                </IconButton>
-                <ConnectButton moralisAuth={false} />
+                {isConnected && (
+                    <IconButton
+                        className="w-8 h-8 text-black hover:text-default-dark-blue justify-center items-center px-2"
+                        title="Add new order"
+                        onClick={onCreateOrder}
+                    >
+                        <DocumentPlusIcon className="h-5 w-5" />
+                    </IconButton>
+                )}
+                {/* <ConnectButton moralisAuth={false} /> */}
+                <ConnectButton />
             </div>
         </div>
     )

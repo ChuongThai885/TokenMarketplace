@@ -16,23 +16,12 @@ const TABLE_HEADERS = {
 
 export const DashBoard = () => {
     const [tokenOrders, setTokenOrders] = useState([])
-    // const dispatch = useNotification()
 
-    // const handleNewNotification = () => {
-    //     dispatch({
-    //         id: "custom_noti",
-    //         type: "info",
-    //         message: "Somebody messaged you",
-    //         title: "New Notification",
-    //         position: "topR",
-    //     })
-    // }
     const { getTokensFeed } = useContext(MarketplaceContext)
     const { isWeb3Enabled } = useContext(MoralisContext)
     useEffect(() => {
         const fetchTokensFeedData = async () => {
             let orders = await getTokensFeed()
-            console.log(orders)
             setTokenOrders(orders)
         }
         if (isWeb3Enabled) {
@@ -92,10 +81,10 @@ export const DashBoard = () => {
                                         {totalBuyAmount}
                                     </td>
                                     <td className="px-5 py-3 whitespace-nowrap text-right">
-                                        {priceSell.toFixed(3)} ETH
+                                        {priceSell.toFixed(1)} ETH
                                     </td>
                                     <td className="px-5 py-3 whitespace-nowrap text-right">
-                                        {priceBuy.toFixed(3)} ETH
+                                        {priceBuy.toFixed(1)} ETH
                                     </td>
                                 </tr>
                             )

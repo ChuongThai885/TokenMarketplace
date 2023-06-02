@@ -111,7 +111,6 @@ export const useMarketplace = (marketplaceAddress) => {
         const listOrders = [...buyOrders, ...sellOrders].filter(
             (order) => order !== undefined
         )
-        // return Object.values(
         return Object.values(
             listOrders.reduce((accumulator, entry) => {
                 const {
@@ -193,11 +192,11 @@ export const useMarketplace = (marketplaceAddress) => {
         })
     }
 
-    const cancelOrder = async (userAddress, tokenAddress, isBuyOrder) => {
+    const cancelOrder = async ({ tokenAddress, isBuyOrder }) => {
         return await runContractFunction({
             functionName: "cancelOrder",
             params: {
-                owner: userAddress,
+                owner: account,
                 tokenAddress: tokenAddress,
                 isBuyOrder: isBuyOrder,
             },
