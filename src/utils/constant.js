@@ -1,5 +1,11 @@
 export const SUPPORTTED_CHAIN = ["31337"]
 
+export const MARKETPLACE_EVENT = {
+    ORDER_PLACED: "OrderPlaced",
+    ORDER_MATCHED: "OrderMatched",
+    ORDER_CANCELED: "OrderCanceled",
+}
+
 export const NOTI_TYPE = {
     INFO: "info",
     SUCCESS: "success",
@@ -17,6 +23,7 @@ export const NOTI_POSITION = {
 export const NOTI_TITLE = {
     DEFAULT: "Notification",
     PLACE_ORDER_SUCCESS: "Order placed",
+    ORDER_MATCHED: "Order Matched",
     PLACE_ORDER_ERROR: "Error place order",
     DELETE_ORDER_SUCCESS: "Order deleted",
     DELETE_ORDER_ERROR: "Error delete order",

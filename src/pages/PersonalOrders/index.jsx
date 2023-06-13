@@ -1,11 +1,17 @@
 import { useContext, useEffect, useState } from "react"
 import { DefaultLayout } from "../../components/DefaultLayout"
 import { MarketplaceContext } from "../../contexts/MarketplaceContext"
-import { MoralisContext } from "react-moralis"
+import { MoralisContext } from "../../contexts/MoralisContext"
 import { Blockie } from "web3uikit"
 import { IconButton } from "../../components/IconButton"
 import { TrashIcon } from "@heroicons/react/24/outline"
-import { MESSAGE, NOTI_TITLE, NOTI_TYPE } from "../../utils/constant"
+import {
+    MARKETPLACE_EVENT,
+    MESSAGE,
+    NOTI_TITLE,
+    NOTI_TYPE,
+} from "../../utils/constant"
+import { useERC20Token } from "../../hooks/useERC20Token"
 
 const TABLE_HEADERS = {
     address: { name: "Token Address" },
@@ -19,19 +25,16 @@ const TABLE_HEADERS = {
 
 export const PersonalOrders = () => {
     const [tokenOrders, setTokenOrders] = useState([])
+    const { getTokenSymbol } = useERC20Token()
 
-    const { getPersonalOrders, cancelOrder, emitNotification } =
-        useContext(MarketplaceContext)
-    const { isWeb3Enabled } = useContext(MoralisContext)
-    const fetchTokensFeedData = async () => {
-        let orders = await getPersonalOrders()
-        setTokenOrders(orders)
-    }
-    useEffect(() => {
-        if (isWeb3Enabled) {
-            fetchTokensFeedData()
-        }
-    }, [isWeb3Enabled])
+    const {
+        getMarketplaceContract,
+        getPersonalOrders,
+        cancelOrder,
+        emitNotification,
+    } = useContext(MarketplaceContext)
+    const { isWeb3Enabled, marketplaceAddress, account } =
+        useContext(MoralisContext)
 
     const handleRemoveOrder = async (tokenAddress, isBuyOrder) => {
         const response = await cancelOrder({ tokenAddress, isBuyOrder })
@@ -50,6 +53,75 @@ export const PersonalOrders = () => {
         })
         fetchTokensFeedData()
     }
+
+    const fetchTokensFeedData = async () => {
+        let orders = await getPersonalOrders()
+        setTokenOrders(orders)
+    }
+
+    const handleOrderPlaced = (owner) => {
+        if (owner.toLowerCase() !== account) return
+        fetchTokensFeedData()
+    }
+
+    const handleOrderMatched = async (
+        owner,
+        traderMatched,
+        tokenAddress,
+        amount,
+        price,
+        isBuyOrder
+    ) => {
+        if (
+            owner.toLowerCase() !== account &&
+            traderMatched.toLowerCase() !== account
+        )
+            return
+        const typeOrder =
+            owner.toLowerCase() === account && isBuyOrder ? "buy" : "sell"
+        const tokenSymbol = await getTokenSymbol(tokenAddress)
+        const message = `Your order to ${typeOrder} ${tokenSymbol} tokens has been successfully matched, please check your wallet balance`
+        emitNotification({
+            type: NOTI_TYPE.SUCCESS,
+            title: NOTI_TITLE.ORDER_MATCHED,
+            message,
+        })
+        fetchTokensFeedData()
+    }
+
+    useEffect(() => {
+        if (isWeb3Enabled) {
+            fetchTokensFeedData()
+        }
+    }, [isWeb3Enabled])
+
+    useEffect(() => {
+        if (!marketplaceAddress) return
+
+        const marketplaceContract = getMarketplaceContract(marketplaceAddress)
+
+        marketplaceContract.on(
+            MARKETPLACE_EVENT.ORDER_PLACED,
+            handleOrderPlaced
+        )
+
+        marketplaceContract.on(
+            MARKETPLACE_EVENT.ORDER_MATCHED,
+            handleOrderMatched
+        )
+
+        return () => {
+            marketplaceContract.off(
+                MARKETPLACE_EVENT.ORDER_PLACED,
+                handleOrderPlaced
+            )
+
+            marketplaceContract.off(
+                MARKETPLACE_EVENT.ORDER_MATCHED,
+                handleOrderMatched
+            )
+        }
+    }, [marketplaceAddress])
 
     return (
         <DefaultLayout>

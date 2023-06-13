@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from "react"
 import { MarketplaceContext } from "../../contexts/MarketplaceContext"
 import { MoralisContext } from "../../contexts/MoralisContext"
 import { Blockie } from "web3uikit"
+import { MARKETPLACE_EVENT } from "../../utils/constant"
 
 const TABLE_HEADERS = {
     address: { name: "Token Address" },
@@ -17,17 +18,51 @@ const TABLE_HEADERS = {
 export const DashBoard = () => {
     const [tokenOrders, setTokenOrders] = useState([])
 
-    const { getTokensFeed } = useContext(MarketplaceContext)
-    const { isWeb3Enabled } = useContext(MoralisContext)
+    const { getMarketplaceContract, getTokensFeed } =
+        useContext(MarketplaceContext)
+    const { isWeb3Enabled, marketplaceAddress } = useContext(MoralisContext)
+
+    const fetchTokensFeedData = async () => {
+        let orders = await getTokensFeed()
+        setTokenOrders(orders)
+    }
+
     useEffect(() => {
-        const fetchTokensFeedData = async () => {
-            let orders = await getTokensFeed()
-            setTokenOrders(orders)
-        }
         if (isWeb3Enabled) {
             fetchTokensFeedData()
         }
     }, [isWeb3Enabled])
+
+    useEffect(() => {
+        if (!marketplaceAddress) return
+
+        const marketplaceContract = getMarketplaceContract(marketplaceAddress)
+        marketplaceContract.on(MARKETPLACE_EVENT.ORDER_PLACED, () =>
+            fetchTokensFeedData()
+        )
+
+        marketplaceContract.on(MARKETPLACE_EVENT.ORDER_MATCHED, () =>
+            fetchTokensFeedData()
+        )
+
+        marketplaceContract.on(MARKETPLACE_EVENT.ORDER_CANCELED, () =>
+            fetchTokensFeedData()
+        )
+
+        return () => {
+            marketplaceContract.off(MARKETPLACE_EVENT.ORDER_PLACED, () =>
+                fetchTokensFeedData()
+            )
+
+            marketplaceContract.off(MARKETPLACE_EVENT.ORDER_MATCHED, () =>
+                fetchTokensFeedData()
+            )
+
+            marketplaceContract.off(MARKETPLACE_EVENT.ORDER_CANCELED, () =>
+                fetchTokensFeedData()
+            )
+        }
+    }, [marketplaceAddress])
 
     return (
         <DefaultLayout>
