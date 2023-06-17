@@ -5,6 +5,7 @@ import { DashBoard } from "./pages/Dashboard"
 import { PersonalOrders } from "./pages/PersonalOrders"
 import { MarketplaceProvider } from "./contexts/MarketplaceContext"
 import { MoralisProvider } from "./contexts/MoralisContext"
+import { NotificationProvider } from "./components/NotificationProvider"
 
 const router = createBrowserRouter([
     {
@@ -27,6 +28,7 @@ function App() {
             <MoralisProvider>
                 <MarketplaceProvider>
                     <RouterProvider router={router} />
+                    <NotificationProvider />
                 </MarketplaceProvider>
             </MoralisProvider>
         </div>

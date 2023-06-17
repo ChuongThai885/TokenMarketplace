@@ -11,7 +11,6 @@ import {
     NOTI_TITLE,
     NOTI_TYPE,
 } from "../../utils/constant"
-import { useERC20Token } from "../../hooks/useERC20Token"
 
 const TABLE_HEADERS = {
     address: { name: "Token Address" },
@@ -25,7 +24,6 @@ const TABLE_HEADERS = {
 
 export const PersonalOrders = () => {
     const [tokenOrders, setTokenOrders] = useState([])
-    const { getTokenSymbol } = useERC20Token()
 
     const {
         getMarketplaceContract,
@@ -59,33 +57,8 @@ export const PersonalOrders = () => {
         setTokenOrders(orders)
     }
 
-    const handleOrderPlaced = (owner) => {
+    const handleEventEmited = (owner) => {
         if (owner.toLowerCase() !== account) return
-        fetchTokensFeedData()
-    }
-
-    const handleOrderMatched = async (
-        owner,
-        traderMatched,
-        tokenAddress,
-        amount,
-        price,
-        isBuyOrder
-    ) => {
-        if (
-            owner.toLowerCase() !== account &&
-            traderMatched.toLowerCase() !== account
-        )
-            return
-        const typeOrder =
-            owner.toLowerCase() === account && isBuyOrder ? "buy" : "sell"
-        const tokenSymbol = await getTokenSymbol(tokenAddress)
-        const message = `Your order to ${typeOrder} ${tokenSymbol} tokens has been successfully matched, please check your wallet balance`
-        emitNotification({
-            type: NOTI_TYPE.SUCCESS,
-            title: NOTI_TITLE.ORDER_MATCHED,
-            message,
-        })
         fetchTokensFeedData()
     }
 
@@ -93,6 +66,7 @@ export const PersonalOrders = () => {
         if (isWeb3Enabled) {
             fetchTokensFeedData()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isWeb3Enabled])
 
     useEffect(() => {
@@ -102,25 +76,26 @@ export const PersonalOrders = () => {
 
         marketplaceContract.on(
             MARKETPLACE_EVENT.ORDER_PLACED,
-            handleOrderPlaced
+            handleEventEmited
         )
 
         marketplaceContract.on(
             MARKETPLACE_EVENT.ORDER_MATCHED,
-            handleOrderMatched
+            handleEventEmited
         )
 
         return () => {
             marketplaceContract.off(
                 MARKETPLACE_EVENT.ORDER_PLACED,
-                handleOrderPlaced
+                handleEventEmited
             )
 
             marketplaceContract.off(
                 MARKETPLACE_EVENT.ORDER_MATCHED,
-                handleOrderMatched
+                handleEventEmited
             )
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [marketplaceAddress])
 
     return (

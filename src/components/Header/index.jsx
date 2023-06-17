@@ -25,8 +25,7 @@ export const Header = ({ isConnected, onCreateOrder }) => {
                         <DocumentPlusIcon className="h-5 w-5" />
                     </IconButton>
                 )}
-                {/* <ConnectButton moralisAuth={false} /> */}
-                <ConnectButton />
+                <ConnectButton moralisAuth={false} />
             </div>
         </div>
     )
