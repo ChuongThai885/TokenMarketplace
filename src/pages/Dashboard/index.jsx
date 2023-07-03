@@ -116,10 +116,10 @@ export const DashBoard = () => {
                                         {totalBuyAmount}
                                     </td>
                                     <td className="px-5 py-3 whitespace-nowrap text-right">
-                                        {priceSell.toFixed(1)} ETH
+                                        {priceSell.toFixed(3)} ETH
                                     </td>
                                     <td className="px-5 py-3 whitespace-nowrap text-right">
-                                        {priceBuy.toFixed(1)} ETH
+                                        {priceBuy.toFixed(3)} ETH
                                     </td>
                                 </tr>
                             )

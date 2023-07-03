@@ -10,6 +10,8 @@ import {
     NOTI_TYPE,
     SUPPORTTED_CHAIN,
 } from "../../utils/constant"
+import { loader } from "../Loader"
+import { LoaderContext } from "../../contexts/LoaderContext"
 
 const PLACE_ORDER_MODAL_ID = "place-order-form"
 
@@ -18,6 +20,7 @@ export const DefaultLayout = ({ children }) => {
 
     const { placeSellOrder, placeBuyOrder, emitNotification } =
         useContext(MarketplaceContext)
+    const { setIsTransactionBeingProcessed } = useContext(LoaderContext)
 
     const { modal, triggerModal } = useModal()
 
@@ -27,6 +30,8 @@ export const DefaultLayout = ({ children }) => {
         totalPrice,
         isBuyOrder,
     }) => {
+        loader.emit("start")
+        setIsTransactionBeingProcessed(true)
         let response
         if (isBuyOrder) {
             response = await placeBuyOrder({
@@ -41,6 +46,9 @@ export const DefaultLayout = ({ children }) => {
                 totalPrice,
             })
         }
+        loader.emit("stop")
+        setIsTransactionBeingProcessed(false)
+
         if (response.error) {
             emitNotification({
                 type: NOTI_TYPE.ERROR,

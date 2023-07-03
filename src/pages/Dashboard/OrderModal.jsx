@@ -168,10 +168,10 @@ export const OrderModal = ({ id, onCancel, onSubmit }) => {
                 </div>
 
                 <div className="mt-2">
-                    <div className="flex justify-between">
+                    <div className="flex items-center space-x-3">
                         <button
                             type="button"
-                            className="px-4 py-2 font-bold text-slate-500 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:shadow-outline"
+                            className="w-full text-slate-500 bg-white hover:bg-gray-200 focus:outline-none rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
                             onClick={handleCancel}
                         >
                             Cancel
@@ -179,7 +179,7 @@ export const OrderModal = ({ id, onCancel, onSubmit }) => {
 
                         <button
                             type="submit"
-                            className="px-4 py-2 font-bold text-white bg-default-dark-blue/75 hover:bg-default-dark-blue disabled:bg-default-light-blue disabled:text-slate-500 rounded focus:outline-none focus:shadow-outline"
+                            className="w-full text-white bg-default-dark-blue/75 disabled:bg-default-dark-blue/75 hover:bg-default-dark-blue focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                             disabled={!isValidToken}
                         >
                             Place Order

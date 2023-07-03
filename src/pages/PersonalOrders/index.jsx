@@ -11,6 +11,12 @@ import {
     NOTI_TITLE,
     NOTI_TYPE,
 } from "../../utils/constant"
+import { loader } from "../../components/Loader"
+import { useModal } from "../../hooks/useModal"
+import { DeleteModal } from "../../components/ModalBox/DeleteModal"
+import { LoaderContext } from "../../contexts/LoaderContext"
+
+const DELETE_ORDER_MODAL_ID = "delete-modal"
 
 const TABLE_HEADERS = {
     address: { name: "Token Address" },
@@ -24,6 +30,10 @@ const TABLE_HEADERS = {
 
 export const PersonalOrders = () => {
     const [tokenOrders, setTokenOrders] = useState([])
+    const [orderSelected, setOrderSelected] = useState({
+        tokenAddress: "",
+        isBuyOrder: false,
+    })
 
     const {
         getMarketplaceContract,
@@ -33,12 +43,21 @@ export const PersonalOrders = () => {
     } = useContext(MarketplaceContext)
     const { isWeb3Enabled, marketplaceAddress, account } =
         useContext(MoralisContext)
+    const { isTransactionBeingProcessed, setIsTransactionBeingProcessed } =
+        useContext(LoaderContext)
+
+    const { modal, triggerModal } = useModal()
 
     const handleRemoveOrder = async (tokenAddress, isBuyOrder) => {
+        loader.emit("start")
+        setIsTransactionBeingProcessed(true)
         const response = await cancelOrder({ tokenAddress, isBuyOrder })
+        loader.emit("stop")
+        setIsTransactionBeingProcessed(false)
+
         if (response.error) {
             emitNotification({
-                type: NOTI_TYPE.SUCCESS,
+                type: NOTI_TYPE.ERROR,
                 title: NOTI_TITLE.DELETE_ORDER_ERROR,
                 message: response.error,
             })
@@ -156,14 +175,25 @@ export const PersonalOrders = () => {
                                     </td>
                                     <td>
                                         <IconButton
-                                            title="Remove Order"
-                                            className="hover:text-default-dark-blue"
+                                            title={
+                                                isTransactionBeingProcessed
+                                                    ? "Your transaction is being processed"
+                                                    : "Remove Order"
+                                            }
+                                            className="hover:text-default-dark-blue disabled:hover:text-black disabled:cursor-not-allowed"
                                             onClick={() => {
-                                                handleRemoveOrder(
+                                                setOrderSelected({
                                                     tokenAddress,
-                                                    isBuyOrder
-                                                )
+                                                    isBuyOrder,
+                                                })
+                                                triggerModal({
+                                                    targetId:
+                                                        DELETE_ORDER_MODAL_ID,
+                                                })
                                             }}
+                                            disabled={
+                                                isTransactionBeingProcessed
+                                            }
                                         >
                                             <TrashIcon className="h-4 w-4" />
                                         </IconButton>
@@ -174,6 +204,18 @@ export const PersonalOrders = () => {
                     </tbody>
                 </table>
             </div>
+
+            <DeleteModal
+                modalProps={{ id: DELETE_ORDER_MODAL_ID, className: "w-2/3" }}
+                onCancel={() => modal.hide()}
+                onDelete={() => {
+                    modal.hide()
+                    handleRemoveOrder(
+                        orderSelected.tokenAddress,
+                        orderSelected.isBuyOrder
+                    )
+                }}
+            />
         </DefaultLayout>
     )
 }

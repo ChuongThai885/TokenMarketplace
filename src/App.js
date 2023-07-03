@@ -6,6 +6,8 @@ import { PersonalOrders } from "./pages/PersonalOrders"
 import { MarketplaceProvider } from "./contexts/MarketplaceContext"
 import { MoralisProvider } from "./contexts/MoralisContext"
 import { NotificationProvider } from "./components/NotificationProvider"
+import { LoadingBar } from "./components/Loader"
+import { LoaderProvider } from "./contexts/LoaderContext"
 
 const router = createBrowserRouter([
     {
@@ -25,12 +27,15 @@ const router = createBrowserRouter([
 function App() {
     return (
         <div className="App">
-            <MoralisProvider>
-                <MarketplaceProvider>
-                    <RouterProvider router={router} />
-                    <NotificationProvider />
-                </MarketplaceProvider>
-            </MoralisProvider>
+            <LoadingBar />
+            <LoaderProvider>
+                <MoralisProvider>
+                    <MarketplaceProvider>
+                        <RouterProvider router={router} />
+                        <NotificationProvider />
+                    </MarketplaceProvider>
+                </MoralisProvider>
+            </LoaderProvider>
         </div>
     )
 }
