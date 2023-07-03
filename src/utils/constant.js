@@ -1,4 +1,4 @@
-export const SUPPORTTED_CHAIN = ["31337"]
+export const SUPPORTTED_CHAIN = ["31337", "9669"]
 
 export const MARKETPLACE_EVENT = {
     ORDER_PLACED: "OrderPlaced",
