@@ -16,18 +16,22 @@ export const NotificationProvider = () => {
         tokenAddress,
         amount,
         price,
-        isBuyOrder
+        isBuyOrder,
+        timestamp
     ) => {
         if (
             owner.toLowerCase() !== account &&
             traderMatched.toLowerCase() !== account
         )
             return
+
         const typeOrder =
             owner.toLowerCase() === account && isBuyOrder ? "buy" : "sell"
         const tokenSymbol = await getTokenSymbol(tokenAddress)
         const message = `Your order to ${typeOrder} ${tokenSymbol} tokens has been successfully matched, please check your wallet balance`
+
         emitNotification({
+            id: timestamp.toString(),
             type: NOTI_TYPE.SUCCESS,
             title: NOTI_TITLE.ORDER_MATCHED,
             message,

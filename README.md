@@ -1,6 +1,10 @@
-# Getting Started with Create React App
+# Token Marketplace
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+# Descriptions
+
+The Token Marketplace Dapp is designed as a user-friendly interface for interacting with the Token Marketplace smart contract. Its purpose is to simplify the process of accessing and utilizing the various functions available within the contract.
 
 ## Available Scripts
 
